@@ -1,20 +1,21 @@
 import crypto from 'crypto';
 
-// Instagram comment → DM auto-reply (Instagram API with Instagram Login).
+// Instagram comment → DM auto-reply.
 //
 // Environment variables:
 //   IG_VERIFY_TOKEN   any string; must match "Verify token" in the Meta app webhook settings
-//   IG_APP_SECRET     Meta app secret, used to verify X-Hub-Signature-256
-//   IG_ACCESS_TOKEN   long-lived Instagram user access token
-//                     (scopes: instagram_business_basic, instagram_business_manage_comments,
-//                      instagram_business_manage_messages)
+//   IG_APP_SECRET     Meta app secret (App settings → Basic), used to verify X-Hub-Signature-256
+//   IG_ACCESS_TOKEN   access token from the Meta app dashboard (Unified login system-user token,
+//                     or an Instagram Login user token on older apps)
+//   IG_GRAPH_HOST     optional; graph.facebook.com (default, Unified login) or
+//                     graph.instagram.com (older apps using Instagram Login)
 //   AUTO_REPLY_RULES  JSON array, e.g.
 //     [{"mediaId":"17900000000000000","keyword":"سعر","message":"هلا! السعر 99 ريال 🌟","publicReply":"أرسلنا لك على الخاص ✅"}]
 //     mediaId: the post id, or "*" for every post
 //     keyword: matched case-insensitively anywhere in the comment
 //     publicReply: optional reply posted under the comment
 
-const GRAPH = 'https://graph.instagram.com/v23.0';
+const GRAPH = `https://${process.env.IG_GRAPH_HOST || 'graph.facebook.com'}/v23.0`;
 
 function readRawBody(req) {
   return new Promise((resolve, reject) => {
