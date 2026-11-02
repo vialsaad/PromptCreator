@@ -8,27 +8,29 @@
 
 ### المتطلبات
 - حساب انستقرام **احترافي** (Business أو Creator).
-- تطبيق في [Meta for Developers](https://developers.facebook.com/) بمنتج **Instagram** (API setup with Instagram login).
+- تطبيق في [Meta for Developers](https://developers.facebook.com/) فيه الاستخدام **Manage messaging & content on Instagram**.
+  التطبيقات الجديدة تستخدم **API setup with Unified login**، أما الطريقة القديمة **Instagram login** فما عادت متاحة لها.
 
 ### خطوات الإعداد
-1. في التطبيق، أضف حسابك وولّد **Access Token** بالصلاحيات:
-   `instagram_business_basic`, `instagram_business_manage_comments`, `instagram_business_manage_messages`.
-2. في Vercel ← Settings ← Environment Variables أضف:
+1. في التطبيق: Use cases ← Customize ← **API setup with Unified login**. أضف حساب انستقرام، واضغط **Generate token** وانسخ التوكن.
+2. من **App settings ← Basic** انسخ **App secret**.
+3. في Vercel ← Settings ← Environment Variables أضف:
 
    | المتغير | القيمة |
    |---|---|
    | `IG_VERIFY_TOKEN` | أي كلمة سر تختارها |
-   | `IG_APP_SECRET` | App Secret من إعدادات التطبيق |
+   | `IG_APP_SECRET` | الـ App secret من الخطوة 2 |
    | `IG_ACCESS_TOKEN` | التوكن من الخطوة 1 |
    | `AUTO_REPLY_RULES` | القواعد (شوف تحت) |
+   | `IG_GRAPH_HOST` | اختياري، الافتراضي `graph.facebook.com`. التطبيقات القديمة اللي تستخدم Instagram login تحط `graph.instagram.com` |
 
-3. سوّ Redeploy للمشروع.
-4. في إعدادات Webhooks بالتطبيق:
+4. سوّ Redeploy للمشروع.
+5. في نفس صفحة Unified login، في قسم Configure webhooks:
    - Callback URL: `https://<موقعك>.vercel.app/api/instagram-webhook`
    - Verify token: نفس `IG_VERIFY_TOKEN`
-   - اشترك في حقل **comments**.
-5. فعّل خيار "Allow access to messages" من تطبيق انستقرام (الإعدادات ← الرسائل ← أدوات متصلة).
-6. عشان يشتغل مع الجميع (مو بس حسابات المطورين) لازم التطبيق يكون **Live** ويمر بمراجعة Meta (App Review) للصلاحيات أعلاه.
+   - اشترك في حقل **comments**، وشغّل **Webhook Subscription** جنب الحساب.
+6. فعّل خيار "Allow access to messages" من تطبيق انستقرام (الإعدادات ← الرسائل ← أدوات متصلة).
+7. وضع التطوير (Development) يرسل بس تعليقات الحسابات المضافة للتطبيق (Instagram Testers). عشان يشتغل مع الجميع لازم تنشر التطبيق (**Publish**).
 
 ### صيغة القواعد `AUTO_REPLY_RULES`
 ```json
@@ -47,7 +49,7 @@
 ]
 ```
 - `mediaId`: رقم البوست، أو `*` لكل البوستات. تقدر تجيب رقم البوست من:
-  `https://graph.instagram.com/v23.0/me/media?fields=id,caption,permalink&access_token=TOKEN`
+  `https://graph.facebook.com/v23.0/<IG_ACCOUNT_ID>/media?fields=id,caption,permalink&access_token=TOKEN`
 - `keyword`: الكلمة؛ تنطبق لو كانت موجودة في أي مكان بالتعليق (بدون فرق بين الحروف الكبيرة والصغيرة).
 - `publicReply`: اختياري.
 
